@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Decimen — send a private note</title>
+    <link rel="stylesheet" href="../../shared/style.css" />
+  </head>
+  <body class="tool-page note-page" data-transfer-mode="note">
+    <header class="site-header">
+      <a class="brand" href="../../">DECIMEN</a>
+      <span class="mode-badge">Send note</span>
+    </header>
+    <main class="send-shell">
+      <section class="tool-intro">
+        <p class="eyebrow">Private notes · screen → camera</p>
+        <h1>Send a note</h1>
+        <p>The note becomes an animated code on this screen. It is never uploaded.</p>
+      </section>
+      <label class="note-composer">
+        <span>Your note</span>
+        <textarea id="note-text" rows="7" maxlength="262144" placeholder="Write something for the other device…" autofocus></textarea>
+      </label>
+      <button id="send-note" type="button">Start note stream</button>
+      <div class="hint status-line" id="specs">Write a note to begin</div>
+      <details class="settings">
+        <summary>Transfer settings</summary>
+        <div class="row">
+          <label>tx fps
+            <select id="cfg-fps"><option>10</option><option>15</option><option>20</option><option selected>24</option><option>30</option><option>60</option></select>
+          </label>
+          <label>bytes / frame
+            <select id="cfg-bytes"><option>500</option><option selected>1000</option><option>1465</option><option>1850</option><option>2331</option><option>2953</option></select>
+          </label>
+          <label>error correction
+            <select id="cfg-ecc"><option selected>L</option><option>M</option><option>Q</option><option>H</option></select>
+          </label>
+          <label>display size
+            <input id="cfg-size" type="range" min="300" max="1200" step="50" value="900" />
+          </label>
+        </div>
+      </details>
+      <div class="stage" id="stage" hidden><canvas id="qr" width="16" height="16"></canvas></div>
+      <div class="hint footer-hint">
+        Open <a href="../receive/">Receive notes</a> on the other device and point its camera here.
+      </div>
+    </main>
+    <script type="module" src="../../send/main.ts"></script>
+  </body>
+</html>
