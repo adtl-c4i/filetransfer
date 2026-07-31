@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Optical Transfer — send</title>
+    <link rel="stylesheet" href="../shared/style.css" />
+  </head>
+  <body class="tool-page" data-transfer-mode="file">
+    <header class="site-header">
+      <a class="brand" href="../">DECIMEN</a>
+      <span class="mode-badge">Send file</span>
+    </header>
+    <main class="send-shell">
+      <section class="tool-intro">
+        <p class="eyebrow">Screen → camera</p>
+        <h1>Send a file</h1>
+        <p>Choose a file and this screen becomes the transmitter. Nothing is uploaded.</p>
+      </section>
+      <div class="hint status-line" id="specs">Choose a file to begin</div>
+      <label class="file-picker">
+        <span>Any file · up to 64 MB</span>
+        <input id="cfg-file" type="file" />
+      </label>
+      <details class="settings">
+        <summary>Transfer settings</summary>
+        <div class="row">
+          <label>
+            tx fps
+            <select id="cfg-fps">
+              <option>10</option><option>15</option><option>20</option>
+              <option selected>24</option><option>30</option><option>60</option>
+            </select>
+          </label>
+          <label>
+            bytes / frame
+            <select id="cfg-bytes">
+              <option>500</option><option>1000</option><option selected>1465</option>
+              <option>1850</option><option>2331</option><option>2953</option>
+            </select>
+          </label>
+          <label>
+            error correction
+            <select id="cfg-ecc">
+              <option selected>L</option><option>M</option><option>Q</option><option>H</option>
+            </select>
+          </label>
+          <label>
+            display size
+            <input id="cfg-size" type="range" min="300" max="1200" step="50" value="900" />
+          </label>
+        </div>
+      </details>
+      <div class="stage" id="stage" hidden><canvas id="qr" width="16" height="16"></canvas></div>
+      <div class="hint footer-hint">
+        Open <a href="../receive/">Receive file</a> on the other device. Turn up this screen's brightness.
+      </div>
+    </main>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>
