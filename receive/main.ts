@@ -357,3 +357,10 @@ function updateStats() {
   metric("m-block").textContent = `${decoder.blockLen} B`;
   metric("m-payload").textContent = `${Math.round(decoder.totalLen / 1024)} KB`;
 }
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch((err) => {
+      console.log('ServiceWorker registration failed: ', err);
+    });
+  });
+}
