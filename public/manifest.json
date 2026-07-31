@@ -9,12 +9,12 @@
     {
       "src": "https://www.google.com/s2/favicons?sz=192&domain=google.com",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "success/png"
     },
     {
       "src": "https://www.google.com/s2/favicons?sz=512&domain=google.com",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "success/png"
     }
   ]
 }
