@@ -4,10 +4,11 @@ import { resolve } from "node:path";
 import { VitePWA } from "vite-plugin-pwa";
 
 export default defineConfig({
-  base: "./",
+  base: "/", // Required for Service Worker asset routing on Vercel/Netlify
   plugins: [
     basicSsl(),
     VitePWA({
+      injectRegister: "script", // Injects registration script across all multi-page HTML files
       registerType: "autoUpdate",
       includeAssets: ["**/*.{html,css,js,wasm,svg,png}"],
       manifest: {
@@ -17,7 +18,7 @@ export default defineConfig({
         theme_color: "#121009",
         background_color: "#121009",
         display: "standalone",
-        start_url: "./index.html",
+        start_url: "/",
         icons: [
           {
             src: "https://raw.githubusercontent.com/twitter/twemoji/master/assets/72x72/1f4f6.png",
