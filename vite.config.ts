@@ -4,11 +4,11 @@ import { resolve } from "node:path";
 import { VitePWA } from "vite-plugin-pwa";
 
 export default defineConfig({
-  base: "/", // Required for Service Worker asset routing on Vercel/Netlify
+  base: "/",
   plugins: [
     basicSsl(),
     VitePWA({
-      injectRegister: "script", // Injects registration script across all multi-page HTML files
+      injectRegister: "script",
       registerType: "autoUpdate",
       includeAssets: ["**/*.{html,css,js,wasm,svg,png}"],
       manifest: {
@@ -33,7 +33,7 @@ export default defineConfig({
         ]
       },
       workbox: {
-        globPatterns: ["**/*.{js,css,html,wasm,png,svg}"]
+        globPatterns: ["**/*.{js,css,html,wasm,png,svg}"],
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024
       }
     })
