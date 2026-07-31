@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>Optical Transfer — receive</title>
+    <link rel="stylesheet" href="../shared/style.css" />
+  </head>
+  <body class="receiver-page" data-transfer-mode="file">
+    <header class="site-header">
+      <a class="brand" href="../">DECIMEN</a>
+      <span class="mode-badge">Receive file</span>
+    </header>
+    <main class="receiver-shell">
+      <section class="receiver-primary">
+        <div class="receiver-heading">
+          <div>
+            <p class="eyebrow">Camera → device</p>
+            <h1>Receive a file</h1>
+          </div>
+          <div class="hint status-line" id="stats">Ready to scan a file stream</div>
+        </div>
+        <details class="settings" id="settings">
+          <summary>Camera settings</summary>
+          <div class="row">
+            <label>capture width
+              <select id="cfg-width"><option>960</option><option selected>1280</option><option>1920</option></select>
+            </label>
+            <label>capture fps
+              <select id="cfg-capfps"><option>30</option><option selected>60</option></select>
+            </label>
+            <label>decode workers
+              <select id="cfg-workers"><option>1</option><option selected>2</option><option>3</option></select>
+            </label>
+          </div>
+        </details>
+        <button id="start">Start camera</button>
+        <div class="preview" id="preview" style="display: none">
+          <video id="video" muted playsinline></video>
+          <div class="transfer-hud">
+            <div class="progress-status" id="progress-status" style="display: none" aria-live="polite">
+              <strong id="progress-label">0% · 0 frames</strong>
+              <span id="eta-label">Estimating time…</span>
+            </div>
+            <div
+              class="progress"
+              id="progress"
+              style="display: none"
+              role="progressbar"
+              aria-label="File recovery progress"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              aria-valuenow="0"
+            ><div id="bar"></div></div>
+          </div>
+        </div>
+        <div id="result"></div>
+        <details class="settings diagnostics" id="diagnostics" style="display: none">
+          <summary>Live diagnostics</summary>
+          <div class="metrics" id="metrics" style="display: none">
+            <div class="metric"><div class="k">capture fps</div><div class="v" id="m-cap">—</div></div>
+            <div class="metric"><div class="k">decode fps</div><div class="v amber" id="m-dec">—</div></div>
+            <div class="metric"><div class="k">goodput</div><div class="v amber" id="m-rate">—</div></div>
+            <div class="metric"><div class="k">elapsed</div><div class="v" id="m-time">—</div></div>
+            <div class="metric"><div class="k">frames new/dup</div><div class="v" id="m-frames">—</div></div>
+            <div class="metric"><div class="k">blocks K</div><div class="v" id="m-k">—</div></div>
+            <div class="metric"><div class="k">block len</div><div class="v" id="m-block">—</div></div>
+            <div class="metric"><div class="k">transfer</div><div class="v" id="m-payload">—</div></div>
+          </div>
+        </details>
+      </section>
+    </main>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>
