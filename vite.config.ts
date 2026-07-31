@@ -1,25 +1,35 @@
 import { defineConfig } from "vite";
-import basicSsl from "@vitejs/plugin-basic-ssl";
-import { resolve } from "node:path";
+import { VitePWA } from "vite-plugin-pwa";
 
-// HTTPS always: the receiver needs getUserMedia, and on insecure origins
-// that API does not exist at all — a phone reaching this server over the LAN
-// gets no camera on plain http (browser rule, localhost-only exemption).
-// The generated cert is self-signed: tap through the warning once on the
-// phone and the page is still a secure context, so the camera works.
 export default defineConfig({
-  base: "./",
-  plugins: [basicSsl()],
-  build: {
-    rollupOptions: {
-      input: {
-        index: resolve(__dirname, "index.html"),
-        send: resolve(__dirname, "send/index.html"),
-        receive: resolve(__dirname, "receive/index.html"),
-        noteSend: resolve(__dirname, "notes/send/index.html"),
-        noteReceive: resolve(__dirname, "notes/receive/index.html"),
+  plugins: [
+    VitePWA({
+      registerType: "autoUpdate",
+      includeAssets: ["**/*.{html,css,js,wasm,svg,png}"],
+      manifest: {
+        name: "Decimen Optical Transfer",
+        short_name: "Decimen",
+        description: "Offline screen-to-camera optical file transfer",
+        theme_color: "#121009",
+        background_color: "#121009",
+        display: "standalone",
+        start_url: "/",
+        icons: [
+          {
+            src: "https://raw.githubusercontent.com/twitter/twemoji/master/assets/72x72/1f4f6.png",
+            sizes: "192x192",
+            type: "image/png"
+          },
+          {
+            src: "https://raw.githubusercontent.com/twitter/twemoji/master/assets/72x72/1f4f6.png",
+            sizes: "512x512",
+            type: "image/png"
+          }
+        ]
       },
-    },
-  },
-  server: { host: true },
+      workbox: {
+        globPatterns: ["**/*.{js,css,html,wasm,png,svg}"]
+      }
+    })
+  ]
 });
