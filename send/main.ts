@@ -238,4 +238,11 @@ async function startStream() {
   requestAnimationFrame(tick);
 }
 
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch((err) => {
+      console.log('ServiceWorker registration failed: ', err);
+    });
+  });
+}
 void main();
