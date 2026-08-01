@@ -1,12 +1,4 @@
 // Receiver: camera → WASM QR decode in workers → fountain decoder → file.
-//
-// Field lessons baked in:
-// - iOS treats `frameRate: {ideal: 60}` as a suggestion and delivers 30.
-//   Demand `exact` first (it works at 1280-wide), fall back to `ideal`.
-// - requestVideoFrameCallback chains survive a stopped stream and resume on
-//   the next one — a generation counter prevents zombie capture loops.
-// - Progress must track frames COLLECTED: LT peeling back-loads its solve
-//   cascade, so blocks-solved looks stalled and then teleports to done.
 
 import { LTDecoder } from "../shared/fountain";
 import {
@@ -65,8 +57,6 @@ if (transferMode === "note") renderStoredNotes();
 
 async function start() {
   if (!navigator.mediaDevices?.getUserMedia) {
-    // On insecure origins the API doesn't exist AT ALL — this is the plain-
-    // http-over-LAN case. localhost is exempt; other hosts need https.
     stats.textContent =
       "✗ camera needs a secure context — this page must be served over " +
       "https to use the camera from another device (npm run dev:https).";
@@ -136,34 +126,39 @@ function scheduleFrame(gen: number) {
   const v = video as VideoRVFC;
   const next = () => {
     if (done || gen !== captureGen) return;
-    captureFrame();
+    void captureFrame();
     scheduleFrame(gen);
   };
   if (v.requestVideoFrameCallback) v.requestVideoFrameCallback(next);
   else requestAnimationFrame(next);
 }
 
-const grab = document.createElement("canvas");
 let frameId = 0;
 
-function captureFrame() {
+async function captureFrame() {
   const vw = video.videoWidth;
   const vh = video.videoHeight;
   if (!vw || !vh) return;
-  captureTimes.push(performance.now());
+
   const slot = busy.indexOf(false);
-  if (slot === -1) return; // all workers busy — drop the frame, no harm done
-  if (grab.width !== vw || grab.height !== vh) {
-    grab.width = vw;
-    grab.height = vh;
-  }
-  const ctx = grab.getContext("2d", { willReadFrequently: true })!;
-  ctx.drawImage(video, 0, 0);
-  const img = ctx.getImageData(0, 0, vw, vh);
+  if (slot === -1) return; // All workers busy — skip frame cleanly
+
   busy[slot] = true;
-  workers[slot]!.postMessage({ id: frameId++, buf: img.data.buffer, w: vw, h: vh }, [
-    img.data.buffer,
-  ]);
+  captureTimes.push(performance.now());
+
+  try {
+    // Center-crop a square ROI to eliminate empty side-padding before decoding
+    const size = Math.min(vw, vh);
+    const sx = Math.floor((vw - size) / 2);
+    const sy = Math.floor((vh - size) / 2);
+
+    // Create zero-copy GPU ImageBitmap and transfer ownership directly to worker
+    const bmp = await createImageBitmap(video, sx, sy, size, size);
+    const currentFrameId = frameId++;
+    workers[slot]!.postMessage({ id: currentFrameId, bmp }, [bmp]);
+  } catch {
+    busy[slot] = false;
+  }
 }
 
 function onDecoded(bytes: Uint8Array) {
@@ -356,11 +351,4 @@ function updateStats() {
   metric("m-k").textContent = String(decoder.k);
   metric("m-block").textContent = `${decoder.blockLen} B`;
   metric("m-payload").textContent = `${Math.round(decoder.totalLen / 1024)} KB`;
-}
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch((err) => {
-      console.log('ServiceWorker registration failed: ', err);
-    });
-  });
 }
