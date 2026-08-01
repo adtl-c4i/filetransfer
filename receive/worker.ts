@@ -1,8 +1,4 @@
-// QR decode worker: zxing-cpp compiled to WASM. (Safari has never shipped
-// BarcodeDetector — WebKit bug 281848 — so WASM is the only portable way.)
-// One frame in flight per worker; the main thread drops frames when all
-// workers are busy. Frames are disposable — the fountain doesn't care.
-
+// QR decode worker: zxing-cpp compiled to WASM.
 import wasmUrl from "zxing-wasm/reader/zxing_reader.wasm?url";
 import { prepareZXingModule, readBarcodes } from "zxing-wasm/reader";
 
@@ -19,18 +15,26 @@ const ctx = self as unknown as {
 };
 
 ctx.onmessage = async (e: MessageEvent) => {
-  const { id, buf, w, h } = e.data as { id: number; buf: ArrayBuffer; w: number; h: number };
+  const { id, bmp } = e.data as { id: number; bmp: ImageBitmap };
   try {
-    const img = new ImageData(new Uint8ClampedArray(buf), w, h);
-    const results = await readBarcodes(img, { formats: ["QRCode"], maxNumberOfSymbols: 1 });
+    // Tune ZXing options for fast streaming throughput
+    const results = await readBarcodes(bmp, {
+      formats: ["QRCode"],
+      maxNumberOfSymbols: 1,
+      tryHarder: false, // Prevents slow deep-scan heuristics on blurry frames
+      tryRotate: true,
+    });
     const r = results.find((x) => x.isValid && x.bytes.length > 0);
     ctx.postMessage({ id, bytes: r ? r.bytes : null });
   } catch {
     ctx.postMessage({ id, bytes: null });
+  } finally {
+    // Explicitly release GPU memory allocated by the transferred ImageBitmap
+    bmp.close();
   }
 };
 
-// warm the WASM so the first real frame doesn't pay instantiation
+// Warm up WASM module
 void readBarcodes(new ImageData(8, 8), { formats: ["QRCode"] })
   .catch(() => undefined)
   .then(() => ctx.postMessage({ id: -1, bytes: null }));
