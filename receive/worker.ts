@@ -23,8 +23,14 @@ ctx.onmessage = async (e: MessageEvent) => {
     // Reuse OffscreenCanvas to convert ImageBitmap to ImageData off the main thread
     if (!offscreen || offscreen.width !== bmp.width || offscreen.height !== bmp.height) {
       offscreen = new OffscreenCanvas(bmp.width, bmp.height);
-      offCtx = offscreen.getContext("2d", { willReadFrequently: true })!;
+      offCtx = offscreen.getContext("2d", { willReadFrequently: true });
     }
+
+    if (!offCtx) {
+      ctx.postMessage({ id, bytes: null });
+      return;
+    }
+
     offCtx.drawImage(bmp, 0, 0);
     const imgData = offCtx.getImageData(0, 0, bmp.width, bmp.height);
 
