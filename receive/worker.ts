@@ -14,14 +14,24 @@ const ctx = self as unknown as {
   postMessage(msg: unknown, transfer?: Transferable[]): void;
 };
 
+let offscreen: OffscreenCanvas | null = null;
+let offCtx: OffscreenCanvasRenderingContext2D | null = null;
+
 ctx.onmessage = async (e: MessageEvent) => {
   const { id, bmp } = e.data as { id: number; bmp: ImageBitmap };
   try {
-    // Tune ZXing options for fast streaming throughput
-    const results = await readBarcodes(bmp, {
+    // Reuse OffscreenCanvas to convert ImageBitmap to ImageData off the main thread
+    if (!offscreen || offscreen.width !== bmp.width || offscreen.height !== bmp.height) {
+      offscreen = new OffscreenCanvas(bmp.width, bmp.height);
+      offCtx = offscreen.getContext("2d", { willReadFrequently: true })!;
+    }
+    offCtx.drawImage(bmp, 0, 0);
+    const imgData = offCtx.getImageData(0, 0, bmp.width, bmp.height);
+
+    const results = await readBarcodes(imgData, {
       formats: ["QRCode"],
       maxNumberOfSymbols: 1,
-      tryHarder: false, // Prevents slow deep-scan heuristics on blurry frames
+      tryHarder: false,
       tryRotate: true,
     });
     const r = results.find((x) => x.isValid && x.bytes.length > 0);
@@ -29,7 +39,6 @@ ctx.onmessage = async (e: MessageEvent) => {
   } catch {
     ctx.postMessage({ id, bytes: null });
   } finally {
-    // Explicitly release GPU memory allocated by the transferred ImageBitmap
     bmp.close();
   }
 };
